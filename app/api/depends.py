@@ -9,3 +9,4 @@ async def get_uow() -> AsyncGenerator[UnitOfWork, None]:
 
     async with UnitOfWork(session_factory=async_session_maker) as uow:
         yield uow
+        
