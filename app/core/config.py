@@ -1,10 +1,7 @@
-from typing import Optional
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-
     """Application settings"""
 
     DB_HOST: str = "localhost"
@@ -15,20 +12,18 @@ class Settings(BaseSettings):
 
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
-    REDIS_PASSWORD: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property
     def database_url(self):
-        user = f'{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}'
-        database = f'{self.DB_HOST}:{self.DB_PORT}/{self.POSTGRES_DB}'
-        return f'postgresql+asyncpg://{user}@{database}'
+        user = f"{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+        database = f"{self.DB_HOST}:{self.DB_PORT}/{self.POSTGRES_DB}"
+        return f"postgresql+asyncpg://{user}@{database}"
 
     @property
     def redis_url(self):
-        return f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}'
-        
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"
 
 
 settings = Settings()

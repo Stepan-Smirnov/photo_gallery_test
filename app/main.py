@@ -1,19 +1,21 @@
-from redis.asyncio import Redis
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from starlette.background import P
+from fastapi import FastAPI
+from redis.asyncio import Redis
 
 from app.core import settings
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Lifespan"""
 
     app.state.redis = Redis.from_url(
-        settings.redis_url, decode_responses=True, encoding="utf-8",
-         password=settings.REDIS_PASSWORD
+        settings.redis_url,
+        decode_responses=True,
+        encoding="utf-8",
     )
-    await app.state.redis.aclose()
+    await app.state.redis.ping()
     try:
         yield
     finally:

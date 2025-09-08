@@ -1,1 +1,1 @@
-from app.core.config import settings # noqa
+from app.core.config import settings  # noqa
