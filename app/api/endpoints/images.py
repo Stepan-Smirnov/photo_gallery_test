@@ -16,8 +16,8 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def create_image(
-    image: Annotated[ImageCreate, Depends(ImageCreate)],
-    file: Annotated[UploadFile, File(..., description="Image file")],
+    image: Annotated[ImageCreate, Depends()],
+    file: Annotated[UploadFile, File(description="Image file")],
     uow: Annotated[UnitOfWork, Depends(get_uow)],
 ):
     """Create image"""
