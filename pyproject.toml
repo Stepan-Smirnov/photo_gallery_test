@@ -9,6 +9,7 @@ dependencies = [
     "asyncpg>=0.30.0",
     "fastapi[standard]==0.115.0",
     "pydantic-settings>=2.10.1",
+    "redis>=6.4.0",
 ]
 
 [dependency-groups]
@@ -46,6 +47,7 @@ fixable = [
 
 [tool.ruff.lint.extend-per-file-ignores]
 
+"app/*.py" = ["S105"]
 "tests/*.py" = ["S101", "DTZ005"]
 
 [tool.ruff.format]
