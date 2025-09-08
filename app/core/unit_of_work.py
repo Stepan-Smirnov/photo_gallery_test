@@ -8,7 +8,7 @@ class UnitOfWork:
         self._cache = {}
 
     async def __aenter__(self) -> "UnitOfWork":
-        self.session = self.session_maker()
+        self.session = self._session_factory()
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
