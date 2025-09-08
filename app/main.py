@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from redis.asyncio import Redis
 
-from app.core import settings
 from app.api.routers import main_router
+from app.core import settings
 
 
 @asynccontextmanager
