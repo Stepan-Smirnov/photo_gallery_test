@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres_password"
 
-    REDIS_HOST: str
-    REDIS_PORT: str
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
     REDIS_PASSWORD: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     @property
     def redis_url(self):
-        return f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}:{self.REDIS_PASSWORD}'
+        return f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}'
         
 
 
