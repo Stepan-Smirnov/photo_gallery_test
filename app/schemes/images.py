@@ -31,10 +31,7 @@ class ImageCreate(ImageBase):
     title: str_type
     description: str_type
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 0cbf81f30e3afd6b32d741d47486a38b1054a65c
 class ImageUpdate(ImageBase):
     """Image update scheme"""
 
