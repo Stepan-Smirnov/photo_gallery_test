@@ -18,6 +18,8 @@ class BaseRepository[T](AbstractRepository):
 
         obj = self.model(**item.model_dump())
         self.session.add(obj)
+        await self.session.flush()
+        return obj
 
     async def get(self, id: int) -> T | None:
         """Get item from database or none"""

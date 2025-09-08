@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from app.api.depends import get_uow
 from app.core.unit_of_work import UnitOfWork
-from app.schemes.images import ImageCreate
+from app.schemes.images import ImageCreate, ImageResponse
 from app.use_cases.images import img_use_case
 
 router = APIRouter()
@@ -14,11 +14,16 @@ router = APIRouter()
     path="/",
     summary="Create image",
     status_code=status.HTTP_201_CREATED,
+    response_model=ImageResponse,
 )
 async def create_image(
     image: Annotated[ImageCreate, Depends()],
     file: Annotated[UploadFile, File(description="Image file")],
     uow: Annotated[UnitOfWork, Depends(get_uow)],
 ):
-    """Create image"""
+    """
+    - *title**: str - min 1, max 32 characters
+    - **description**: str - min 1, max 32 characters
+    - **file**: UploadFile - max 10MB
+    """
     return await img_use_case.create_image(uow=uow, dto=image, file=file)

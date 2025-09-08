@@ -17,6 +17,13 @@ class ImageBase(BaseModel):
         str_strip_whitespace=True,
     )
 
+
+class ImageCreate(ImageBase):
+    """Image create scheme"""
+
+    title: str_type
+    description: str_type
+
     @model_validator(mode="before")
     def validate_title_and_description(cls, data: dict):
         for field in data.values():
@@ -25,14 +32,7 @@ class ImageBase(BaseModel):
         return data
 
 
-class ImageCreate(ImageBase):
-    """Image create scheme"""
-
-    title: str_type
-    description: str_type
-
-
-class ImageUpdate(ImageBase):
+class ImageUpdate(ImageCreate):
     """Image update scheme"""
 
     title: str_type | None = None

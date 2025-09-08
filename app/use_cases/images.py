@@ -54,7 +54,8 @@ class ImageUseCase:
             file_url=str(file_url),
         )
 
-        return await img_repo.add(item=dto)
+        img = await img_repo.add(item=dto)
+        return img
 
 
 img_use_case = ImageUseCase()
