@@ -1,0 +1,54 @@
+[project]
+name = "photo-gallery-test"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.16.5",
+    "asyncpg>=0.30.0",
+    "fastapi[standard]==0.115.0",
+    "pydantic-settings>=2.10.1",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+    "ruff>=0.12.12",
+]
+
+
+[tool.ruff]
+
+target-version = "py312"
+extend-exclude = ["migrations"]
+line-length = 79
+show-fixes = true
+
+[tool.ruff.lint]
+
+select = [
+    "UP",   # pyupgrade
+    "I",    # isort
+    "F",    # flake8-pyflakes
+    "S",    # flake8-bandit
+    "BLE",  # flake8-blind-except
+    "T20",  # flake8-print
+    "PT",   # flake8-pytest-style
+    "DTZ",  # flake8-datetimez
+]
+
+fixable = [
+    "I",
+    "F401",
+    "T20",
+]
+
+[tool.ruff.lint.extend-per-file-ignores]
+
+"tests/*.py" = ["S101", "DTZ005"]
+
+[tool.ruff.format]
+
+quote-style = "double"
+indent-style = "space"
