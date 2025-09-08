@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     @property
     def redis_url(self):
         return f'redis://{self.REDIS_HOST}:{self.REDIS_PORT}:{self.REDIS_PASSWORD}'
+        
 
 
 settings = Settings()
