@@ -1,7 +1,10 @@
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field
+from fastapi.background import P
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from app.exception import ValueIsSpace
 
 
 str_type = Annotated[str, Field(min_length=1, max_length=32)]
@@ -12,6 +15,13 @@ class ImageBase(BaseModel):
     model_config = ConfigDict(
         extra="forbid", str_strip_whitespace=True
     )
+
+    @model_validator(mode="before")
+    def validate_title_and_description(cls, data: dict):
+        for field in data.values():
+            if not field or field.isspace():
+                raise ValueIsSpace
+        return data
 
 class ImageCreate(ImageBase):
     """Image create scheme"""

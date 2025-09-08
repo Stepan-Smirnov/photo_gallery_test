@@ -20,7 +20,7 @@ router = APIRouter()
 )
 async def create_image(
     dto: Annotated[ImageCreate, Depends()],
-    file: Annotated[UploadFile, File(description="Image file")],
+    file: Annotated[UploadFile, File(description="Image file",)],
     uow: Annotated[UnitOfWork, Depends(get_uow)]
 ):
     """Create image"""

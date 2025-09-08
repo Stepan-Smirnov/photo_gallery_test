@@ -12,3 +12,8 @@ class CustomExceptions(HTTPException):
 class ObjNotFound(CustomExceptions):
     status_code = status.HTTP_404_NOT_FOUND
     detail = "object not found"
+
+
+class ValueIsSpace(CustomExceptions):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "value is space"
