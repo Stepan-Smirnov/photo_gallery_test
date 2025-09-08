@@ -3,7 +3,7 @@ from pathlib import Path
 import aiofiles
 from fastapi import UploadFile
 
-from app.constants import IMAGE_EXTENSIONS, MAX_IMAGE_SIZE
+from app.constants import IMAGE_EXTENSIONS, MAX_IMAGE_SIZE, ONE_CHUNK
 from app.core.unit_of_work import UnitOfWork
 from app.exception import (
     ImageAlreadyExists,
@@ -30,32 +30,35 @@ class ImageUseCase:
         file: UploadFile,
     ) -> Image:
         """Create image case"""
+
+        async with uow:
         
-        img_repo = uow.repo(ImagesRepository)
-        img = await img_repo.check_image_exists(dto.title)
-        if img:
-            raise ImageAlreadyExists
-        if file.size > MAX_IMAGE_SIZE:
-            raise ImageTooLarge
+            img_repo = uow.repo(ImagesRepository)
+            img = await img_repo.check_image_exists(dto.title)
+            if img:
+                raise ImageAlreadyExists
+            if file.size > MAX_IMAGE_SIZE:
+                raise ImageTooLarge
 
-        if file.content_type not in IMAGE_EXTENSIONS:
-            raise ImageInvalidExtension
+            if file.content_type not in IMAGE_EXTENSIONS:
+                raise ImageInvalidExtension
 
-        filename = file.filename
-        file_url = self.uploads_dir / filename
+            filename = file.filename
+            file_url = self.uploads_dir / filename
 
-        async with aiofiles.open(file_url, "wb") as f:
-            await f.write(file.file.read())
+            async with aiofiles.open(file_url, "wb") as f:
+                while chunk := await file.read(ONE_CHUNK):
+                    await f.write(chunk)
 
-        dto = ImageWrite(
-            title=dto.title,
-            description=dto.description,
-            filename=filename,
-            file_url=str(file_url),
-        )
+            dto = ImageWrite(
+                title=dto.title,
+                description=dto.description,
+                filename=filename,
+                file_url=str(file_url),
+            )
 
-        img = await img_repo.add(item=dto)
-        return img
+            img = await img_repo.add(item=dto)
+            return img
 
 
 img_use_case = ImageUseCase()
