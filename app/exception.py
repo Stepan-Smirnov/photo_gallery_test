@@ -17,3 +17,16 @@ class ObjNotFound(CustomExceptions):
 class ValueIsSpace(CustomExceptions):
     status_code = status.HTTP_400_BAD_REQUEST
     detail = "value is space"
+
+
+class ImageAlreadyExists(CustomExceptions):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "image already exists"
+
+class ImageTooLarge(CustomExceptions):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "image too large"
+
+class ImageInvalidExtension(CustomExceptions):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "image invalid extension"

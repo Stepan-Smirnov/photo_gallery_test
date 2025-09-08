@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 
 
-
 class AbstractRepository[T](ABC):
     """Abstract repository class"""
 

@@ -49,3 +49,12 @@ class ImageResponse(ImageBase):
     created_at: datetime
     updated_at: datetime
     file_url: str
+
+
+class ImageWrite(ImageBase):
+    """Image write scheme"""
+    
+    title: str_type
+    description: str_type
+    filename: str
+    file_url: str

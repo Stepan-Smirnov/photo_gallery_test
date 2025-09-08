@@ -1,11 +1,11 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, UploadFile, status
-from app.core.unit_of_work import UnitOfWork
 
 from app.api.depends import get_uow
 from app.core.unit_of_work import UnitOfWork
 from app.schemes.images import ImageCreate
+from app.use_cases.images import img_use_case
 
 router = APIRouter()
 
@@ -21,4 +21,4 @@ async def create_image(
     uow: Annotated[UnitOfWork, Depends(get_uow)],
 ):
     """Create image"""
-    pass
+    return await img_use_case.create_image(uow=uow, dto=image, file=file)
