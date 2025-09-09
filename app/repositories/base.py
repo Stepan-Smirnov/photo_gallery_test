@@ -13,7 +13,7 @@ class BaseRepository[T](AbstractRepository[T]):
         self.session = session
         self.model = model
 
-    async def add(self, item: BaseModel) -> T:
+    async def create(self, item: BaseModel) -> T:
         """Add item to database"""
 
         obj = self.model(**item.model_dump())

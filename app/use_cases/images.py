@@ -2,6 +2,7 @@ from pathlib import Path
 
 import aiofiles
 from fastapi import UploadFile
+from redis.asyncio import Redis
 
 from app.constants import IMAGE_EXTENSIONS, MAX_IMAGE_SIZE, ONE_CHUNK
 from app.core.unit_of_work import UnitOfWork
@@ -28,6 +29,7 @@ class ImageUseCase:
         uow: UnitOfWork, 
         dto: ImageCreate,
         file: UploadFile,
+        redis: Redis,
     ) -> Image:
         """Create image case"""
 
@@ -58,7 +60,11 @@ class ImageUseCase:
             )
 
             img = await img_repo.create(item=dto)
-            return img
+        try:
+            await redis.publish("image_created", dto.model_dump_json())
+        except Exception:
+            print("Error publishing image created event")
+        return img
 
 
 img_use_case = ImageUseCase()
