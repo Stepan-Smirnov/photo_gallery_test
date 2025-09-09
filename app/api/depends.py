@@ -1,10 +1,9 @@
-from collections.abc import AsyncGenerator
-
 from fastapi import Request
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import async_session_maker
-from sqlalchemy.ext.asyncio import AsyncSession
+
 
 async def get_session() -> AsyncSession:
     """Get session"""
@@ -14,6 +13,7 @@ async def get_session() -> AsyncSession:
             yield async_session
         finally:
             await async_session.close()
+
 
 def get_redis(request: Request) -> Redis:
     """Get redis"""

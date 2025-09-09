@@ -2,11 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, UploadFile, status
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.depends import get_redis, get_session
 from app.schemes.images import ImageCreate, ImageResponse
 from app.use_cases.images import img_use_case
-from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
