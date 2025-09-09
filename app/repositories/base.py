@@ -21,7 +21,7 @@ class BaseRepository[T](AbstractRepository[T]):
         await self.session.flush()
         return instance
 
-    async def get(self, id: str | int) -> T | None:
+    async def get(self, id: str | int) -> T:
         """Get item from database or none"""
 
         result = await self.session.scalar(select(self.model).filter_by(id=id))

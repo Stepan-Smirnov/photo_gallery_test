@@ -151,7 +151,8 @@ class ImageUseCase:
         async with session.begin():
             img_repo = ImagesRepository(session=session)
             img = await img_repo.get(id=id)
-            return await img_repo.update(instance=img, data=image)
+            img = await img_repo.update(instance=img, data=image)
+        return img
 
     async def delete_image(
         self,
@@ -163,7 +164,7 @@ class ImageUseCase:
         async with session.begin():
             img_repo = ImagesRepository(session=session)
             img = await img_repo.get(id=id)
-            img = await img_repo.delete(obj=img)
+            await img_repo.delete(instance=img)
         self._delete_file(file_url=Path(img.file_url))
 
 
