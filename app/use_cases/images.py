@@ -9,7 +9,6 @@ from redis.asyncio import Redis
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core import settings
 from app.constants import (
     IMAGE_EXTENSIONS,
     MAX_IMAGE_SIZE,
@@ -17,6 +16,7 @@ from app.constants import (
     REDIS_KEY_EXPIRE,
     REDIS_KEY_PREFIX,
 )
+from app.core import settings
 from app.exception import (
     ImageAlreadyExists,
     ImageInvalidExtension,
