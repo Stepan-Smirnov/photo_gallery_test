@@ -6,7 +6,7 @@
 
 Требования: Docker, Docker Compose.
 
-- Создайте файл `.env` в корне (можно скопировать из примера):
+- Создайте файл `.env` в корне (можно скопировать из примера `env.docker.example`):
 ```bash
 cp env.docker.example .env   # macOS/Linux
 # или PowerShell
@@ -46,7 +46,7 @@ docker compose up -d
 - Через uv:
 ```bash
 uv sync
-uv run python listener.py
+uv run listener.py
 ```
 
 - Без uv (через обычный venv/pip):
