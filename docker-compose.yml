@@ -33,7 +33,7 @@ services:
       - redis
     env_file:
       - ./.env
-    command: ["app/docker_scripts/backend.sh"]
+    command: ["/app/docker_scripts/backend.sh"]
 
 
 volumes:
