@@ -24,7 +24,7 @@ async def create_image(
     redis: Annotated[Redis, Depends(get_redis)],
 ):
     """
-    - *title**: str - min 1, max 32 characters
+    - **title**: str - min 1, max 32 characters
     - **description**: str - min 1, max 32 characters
     - **file**: UploadFile - max 10MB
     """

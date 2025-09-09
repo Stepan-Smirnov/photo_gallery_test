@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+  db:
+    image: postgres:16.0-alpine
+    container_name: photo_gallery_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - photo_gallery_db:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+
+  redis:
+    image: redis:7
+    container_name: photo_gallery_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - photo_gallery_redis:/data
+
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: photo_gallery_backend
+    restart: always
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - ./.env
+    command: ["/app/docker_scripts/backend.sh"]
+
+
+    volumes:
+  photo_gallery_db:
+  photo_gallery_redis:
