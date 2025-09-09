@@ -9,11 +9,11 @@ from redis.asyncio import Redis
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import settings
 from app.constants import (
     IMAGE_EXTENSIONS,
     MAX_IMAGE_SIZE,
     ONE_CHUNK,
-    REDIS_CHANNEL,
     REDIS_KEY_EXPIRE,
     REDIS_KEY_PREFIX,
 )
@@ -99,7 +99,7 @@ class ImageUseCase:
                 id=str(img.id),
                 title=img.title,
             )
-            await redis.publish(REDIS_CHANNEL, json.dumps(payload))
+            await redis.publish(settings.REDIS_CHANNEL, json.dumps(payload))
         except Exception:
             logger.exception(msg="Error publishing image created event")
         return img

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "postgres"
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres_password"
+    REDIS_CHANNEL: str = "image_channel"
 
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
