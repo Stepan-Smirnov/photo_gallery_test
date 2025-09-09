@@ -6,6 +6,7 @@ import aiofiles
 from fastapi import UploadFile
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from app.constants import (
     IMAGE_EXTENSIONS,
@@ -35,6 +36,11 @@ class ImageUseCase:
         self.uploads_dir = Path("uploads")
         self.uploads_dir.mkdir(parents=True, exist_ok=True)
 
+
+    def _delete_file(self, file_url: Path):
+        if file_url.exists():
+            file_url.unlink()
+
     async def create_image(
         self,
         session: AsyncSession,
@@ -44,40 +50,38 @@ class ImageUseCase:
     ) -> Image:
         """Create image case"""
 
-        async with session.begin():
-            img_repo = ImagesRepository(session=session)
-            img = await img_repo.check_image_exists(title=dto.title)
+                
+        if file.size > MAX_IMAGE_SIZE:
+            raise ImageTooLarge
 
-            if img:
-                raise ImageAlreadyExists
-            if file.size > MAX_IMAGE_SIZE:
-                raise ImageTooLarge
+        if file.content_type not in IMAGE_EXTENSIONS:
+            raise ImageInvalidExtension
 
-            if file.content_type not in IMAGE_EXTENSIONS:
-                raise ImageInvalidExtension
+        try:
+            filename = file.filename
+            file_url = self.uploads_dir / filename
 
-            try:
-                filename = file.filename
-                file_url = self.uploads_dir / filename
+            async with aiofiles.open(file_url, "wb") as f:
+                while chunk := await file.read(ONE_CHUNK):
+                    await f.write(chunk)
 
-                async with aiofiles.open(file_url, "wb") as f:
-                    while chunk := await file.read(ONE_CHUNK):
-                        await f.write(chunk)
+            dto = ImageWrite(
+                title=dto.title,
+                description=dto.description,
+                filename=filename,
+                file_url=str(file_url),
+            )
 
-                dto = ImageWrite(
-                    title=dto.title,
-                    description=dto.description,
-                    filename=filename,
-                    file_url=str(file_url),
-                )
+            async with session.begin():
+                img = await ImagesRepository(session=session).create(item=dto)
 
-                img = await img_repo.create(item=dto)
-
-            except Exception:
-                if file_url.exists():
-                    file_url.unlink()
-                logger.exception(msg="Error uploading image")
-                raise ServerError
+        except IntegrityError:
+            self._delete_file(file_url=file_url)
+            raise ImageAlreadyExists
+        except Exception:
+            self._delete_file(file_url=file_url)
+            logger.exception(msg="Error uploading image")
+            raise ServerError
 
         try:
             payload = dict(

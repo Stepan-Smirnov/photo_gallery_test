@@ -14,7 +14,6 @@ async def get_session() -> AsyncSession:
         finally:
             await async_session.close()
 
-
 def get_redis(request: Request) -> Redis:
     """Get redis"""
 
