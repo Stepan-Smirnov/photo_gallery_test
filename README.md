@@ -25,11 +25,12 @@ POSTGRES_PASSWORD=postgres_password
 # Redis
 REDIS_HOST=redis
 REDIS_PORT=6379
+REDIS_CHANNEL=image_channel
 ```
 
 - Запуск:
 ```bash
-docker compose up --build -d
+docker compose up -d
 ```
 
 - Документация API: http://localhost:8000/docs
@@ -40,34 +41,27 @@ docker compose up --build -d
 
 ## 2) Как запустить скрипт подписчика listener.py
 
-Скрипт `listener.py` слушает Redis-канал `image_channel` и печатает события загрузки.
+Скрипт `listener.py` не читает .env и по умолчанию подключается к Redis `localhost:6379`, канал `image_channel`.
 
-- Через uv (рекомендуется):
+- Через uv:
 ```bash
+uv sync
 uv run python listener.py
 ```
 
 - Без uv (через обычный venv/pip):
 ```bash
-# создать и активировать виртуальное окружение
 python -m venv .venv
 # Windows PowerShell
 .\.venv\Scripts\Activate.ps1
 # macOS/Linux
 source .venv/bin/activate
 
-# установить зависимости (минимум, чтобы запустить listener)
-pip install redis fastapi pydantic-settings aiofiles alembic asyncpg
-
-# запустить подписчика
+pip install redis
 python listener.py
 ```
 
-- Параметры подключения в `listener.py` по умолчанию:
-  - Redis: `localhost:6379` (это корректно, если `docker compose` пробрасывает порт Redis на хост)
-  - Канал: `image_channel`
-
-Если Redis в другом месте: отредактируйте `listener.py` (host/port) или задайте переменные окружения и читайте их в скрипте.
+Если ваш Redis не на localhost, отредактируйте хост/порт и канал прямо в `listener.py`.
 
 ## 3) Минимальные примеры запросов (curl)
 
@@ -77,18 +71,6 @@ curl -X POST "http://localhost:8000/api/v1/images/" \
   -F "title=My title" \
   -F "description=Short desc" \
   -F "file=@/path/to/image.jpg;type=image/jpeg"
-```
-Ответ (пример):
-```json
-{
-  "id": "<uuid>",
-  "title": "My title",
-  "description": "Short desc",
-  "filename": "image.jpg",
-  "created_at": "2025-09-09T18:09:00+00:00",
-  "updated_at": "2025-09-09T18:09:00+00:00",
-  "file_url": "uploads/<uuid>.jpg"
-}
 ```
 
 - Получить изображение по id:
