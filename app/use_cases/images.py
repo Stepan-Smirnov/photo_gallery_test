@@ -11,6 +11,8 @@ from app.constants import (
     MAX_IMAGE_SIZE,
     ONE_CHUNK,
     REDIS_CHANNEL,
+    REDIS_KEY_PREFIX,
+    REDIS_KEY_EXPIRE,
 )
 from app.core.unit_of_work import UnitOfWork
 from app.exception import (
@@ -21,7 +23,7 @@ from app.exception import (
 )
 from app.models.images import Image
 from app.repositories.images import ImagesRepository
-from app.schemes.images import ImageCreate, ImageWrite
+from app.schemes.images import ImageCreate, ImageWrite, ImageResponse
 
 logger = logging.getLogger(__name__)
 
@@ -87,5 +89,27 @@ class ImageUseCase:
             logger.exception(msg="Error publishing image created event")
         return img
 
+    async def get_image(
+        self,
+        uow: UnitOfWork,
+        id: str,
+        redis: Redis,
+    ) -> Image:
+        """Get image case"""
+
+        img = await redis.get(name=f"{REDIS_KEY_PREFIX}{id}")
+        if img:
+            return ImageResponse.model_validate_json(img)
+
+        async with uow:
+            img_repo: ImagesRepository = uow.repo(ImagesRepository)
+            img = await img_repo.get(id=id)
+        
+            await redis.set(
+                    name=f"{REDIS_KEY_PREFIX}{id}",
+                    value=ImageResponse.model_validate(img).model_dump_json(),
+                    ex=REDIS_KEY_EXPIRE
+                )
+            return img
 
 img_use_case = ImageUseCase()

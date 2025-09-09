@@ -7,5 +7,5 @@ main_router = APIRouter(prefix="/api/v1")
 main_router.include_router(
     router=images_router,
     prefix="/images",
-    tags=["images"],
+    tags=["images 🖼️"],
 )

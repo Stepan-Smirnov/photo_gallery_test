@@ -32,3 +32,21 @@ async def create_image(
     return await img_use_case.create_image(
         uow=uow, dto=image, file=file, redis=redis
     )
+
+
+@router.get(
+    path="/{id}",
+    summary="Get image",
+    response_model=ImageResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_image(
+    id: str,
+    uow: Annotated[UnitOfWork, Depends(get_uow)],
+    redis: Annotated[Redis, Depends(get_redis)],
+):
+    """
+    - **image_id**: str - image id
+    """
+
+    return await img_use_case.get_image(uow=uow, id=id, redis=redis)
