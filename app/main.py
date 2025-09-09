@@ -4,8 +4,9 @@ from fastapi import FastAPI
 from redis.asyncio import Redis
 
 from app.api.routers import main_router
-from app.core import settings
 from app.config_logs import config_logs
+from app.core import settings
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

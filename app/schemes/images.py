@@ -12,7 +12,6 @@ str_type = Annotated[str, Field(min_length=1, max_length=32)]
 class ImageBase(BaseModel):
     """Image base scheme"""
 
-
     model_config = ConfigDict(
         extra="forbid",
         str_strip_whitespace=True,
@@ -54,7 +53,7 @@ class ImageResponse(ImageBase):
 
 class ImageWrite(ImageBase):
     """Image write scheme"""
-    
+
     title: str_type
     description: str_type
     filename: str
