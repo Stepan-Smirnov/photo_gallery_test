@@ -151,7 +151,10 @@ class ImageUseCase:
         async with session.begin():
             img_repo = ImagesRepository(session=session)
             img = await img_repo.get(id=id)
-            img = await img_repo.update(instance=img, data=image)
+            try:
+                img = await img_repo.update(instance=img, data=image)
+            except IntegrityError:
+                raise ImageAlreadyExists
         return img
 
     async def delete_image(

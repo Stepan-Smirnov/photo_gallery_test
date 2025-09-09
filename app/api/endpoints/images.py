@@ -64,7 +64,7 @@ async def get_all_images(
     return await img_use_case.get_all_images(session=session)
 
 
-@router.put(
+@router.patch(
     path="/{id}",
     summary="Update image",
     response_model=ImageResponse,
