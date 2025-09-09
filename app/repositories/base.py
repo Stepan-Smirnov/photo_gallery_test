@@ -18,7 +18,7 @@ class BaseRepository[T](AbstractRepository[T]):
 
         obj = self.model(**item.model_dump())
         self.session.add(obj)
-        await self.session.flush()
+        await self.session.commit()
         return obj
 
     async def get(self, id: str | int) -> T | None:

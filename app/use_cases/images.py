@@ -14,7 +14,7 @@ from app.constants import (
     REDIS_KEY_PREFIX,
     REDIS_KEY_EXPIRE,
 )
-from app.core.unit_of_work import UnitOfWork
+
 from app.exception import (
     ImageAlreadyExists,
     ImageInvalidExtension,
@@ -22,6 +22,7 @@ from app.exception import (
     ServerError,
 )
 from app.models.images import Image
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.images import ImagesRepository
 from app.schemes.images import ImageCreate, ImageWrite, ImageResponse
 
@@ -37,46 +38,45 @@ class ImageUseCase:
 
     async def create_image(
         self,
-        uow: UnitOfWork,
+        session: AsyncSession,
         dto: ImageCreate,
         file: UploadFile,
         redis: Redis,
     ) -> Image:
         """Create image case"""
 
-        async with uow:
-            img_repo: ImagesRepository = uow.repo(ImagesRepository)
-            img = await img_repo.check_image_exists(title=dto.title)
+        img_repo: ImagesRepository = ImagesRepository(session=session)
+        img = await img_repo.check_image_exists(title=dto.title)
 
-            if img:
-                raise ImageAlreadyExists
-            if file.size > MAX_IMAGE_SIZE:
-                raise ImageTooLarge
+        if img:
+            raise ImageAlreadyExists
+        if file.size > MAX_IMAGE_SIZE:
+            raise ImageTooLarge
 
-            if file.content_type not in IMAGE_EXTENSIONS:
-                raise ImageInvalidExtension
+        if file.content_type not in IMAGE_EXTENSIONS:
+            raise ImageInvalidExtension
 
-            try:
-                filename = file.filename
-                file_url = self.uploads_dir / filename
+        try:
+            filename = file.filename
+            file_url = self.uploads_dir / filename
 
-                async with aiofiles.open(file_url, "wb") as f:
-                    while chunk := await file.read(ONE_CHUNK):
-                        await f.write(chunk)
+            async with aiofiles.open(file_url, "wb") as f:
+                while chunk := await file.read(ONE_CHUNK):
+                    await f.write(chunk)
 
-                dto = ImageWrite(
-                    title=dto.title,
-                    description=dto.description,
-                    filename=filename,
-                    file_url=str(file_url),
-                )
+            dto = ImageWrite(
+                title=dto.title,
+                description=dto.description,
+                filename=filename,
+                file_url=str(file_url),
+            )
 
-                img = await img_repo.create(item=dto)
-            except Exception:
-                if file_url.exists():
-                    file_url.unlink()
-                logger.exception(msg="Error uploading image")
-                raise ServerError
+            img = await img_repo.create(item=dto)
+        except Exception:
+            if file_url.exists():
+                file_url.unlink()
+            logger.exception(msg="Error uploading image")
+            raise ServerError
 
         try:
             payload = dict(
@@ -91,7 +91,7 @@ class ImageUseCase:
 
     async def get_image(
         self,
-        uow: UnitOfWork,
+        session: AsyncSession,
         id: str,
         redis: Redis,
     ) -> Image:
@@ -101,15 +101,15 @@ class ImageUseCase:
         if img:
             return ImageResponse.model_validate_json(img)
 
-        async with uow:
-            img_repo: ImagesRepository = uow.repo(ImagesRepository)
-            img = await img_repo.get(id=id)
-        
-            await redis.set(
-                    name=f"{REDIS_KEY_PREFIX}{id}",
-                    value=ImageResponse.model_validate(img).model_dump_json(),
-                    ex=REDIS_KEY_EXPIRE
-                )
-            return img
+
+        img_repo: ImagesRepository = ImagesRepository(session=session)
+        img = await img_repo.get(id=id)
+    
+        await redis.set(
+                name=f"{REDIS_KEY_PREFIX}{id}",
+                value=ImageResponse.model_validate(img).model_dump_json(),
+                ex=REDIS_KEY_EXPIRE
+            )
+        return img
 
 img_use_case = ImageUseCase()

@@ -4,15 +4,18 @@ from fastapi import Request
 from redis.asyncio import Redis
 
 from app.core.db import async_session_maker
-from app.core.unit_of_work import UnitOfWork
+from sqlalchemy.ext.asyncio import AsyncSession
 
+async def get_session() -> AsyncSession:
+    """Get session"""
 
-def get_uow() -> AsyncGenerator[UnitOfWork, None]:
-    """Get unit of work"""
-
-    return UnitOfWork(session_factory=async_session_maker)
-
+    async with async_session_maker() as async_session:
+        try:
+            yield async_session
+        finally:
+            await async_session.close()
 
 def get_redis(request: Request) -> Redis:
     """Get redis"""
+
     return request.app.state.redis

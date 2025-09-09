@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, UploadFile, status
 from redis.asyncio import Redis
 
-from app.api.depends import get_redis, get_uow
-from app.core.unit_of_work import UnitOfWork
+from app.api.depends import get_redis, get_session
 from app.schemes.images import ImageCreate, ImageResponse
 from app.use_cases.images import img_use_case
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
@@ -20,7 +20,7 @@ router = APIRouter()
 async def create_image(
     image: Annotated[ImageCreate, Depends()],
     file: Annotated[UploadFile, File(description="Image file")],
-    uow: Annotated[UnitOfWork, Depends(get_uow)],
+    session: Annotated[AsyncSession, Depends(get_session)],
     redis: Annotated[Redis, Depends(get_redis)],
 ):
     """
@@ -30,7 +30,7 @@ async def create_image(
     """
 
     return await img_use_case.create_image(
-        uow=uow, dto=image, file=file, redis=redis
+        dto=image, file=file, redis=redis, session=session
     )
 
 
@@ -42,11 +42,11 @@ async def create_image(
 )
 async def get_image(
     id: str,
-    uow: Annotated[UnitOfWork, Depends(get_uow)],
     redis: Annotated[Redis, Depends(get_redis)],
+    session: Annotated[AsyncSession, Depends(get_session)],
 ):
     """
     - **image_id**: str - image id
     """
 
-    return await img_use_case.get_image(uow=uow, id=id, redis=redis)
+    return await img_use_case.get_image(id=id, redis=redis, session=session)
