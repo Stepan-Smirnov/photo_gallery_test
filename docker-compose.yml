@@ -7,7 +7,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - photo_gallery_db:/var/lib/postgresql/data/
+      - photo_gallery_db_volume:/var/lib/postgresql/data/
     env_file:
       - ./.env
 
@@ -17,7 +17,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - photo_gallery_redis:/data
+      - photo_gallery_redis_volume:/data
 
 
   backend:
@@ -25,6 +25,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: photo_gallery_backend
+    ports:
+      - "8000:8000"
     restart: always
     depends_on:
       - db
@@ -34,6 +36,6 @@ services:
     command: ["/app/docker_scripts/backend.sh"]
 
 
-    volumes:
-  photo_gallery_db:
-  photo_gallery_redis:
+volumes:
+  photo_gallery_db_volume:
+  photo_gallery_redis_volume:

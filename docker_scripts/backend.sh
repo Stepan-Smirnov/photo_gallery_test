@@ -2,4 +2,4 @@
 
 uv run alembic upgrade head
 
-uv run gunicorn app.main:app --worker-class uvicorn.workers.UvicornWorker --bind=0:8000
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
