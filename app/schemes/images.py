@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from typing import Annotated
 
@@ -42,7 +43,7 @@ class ImageUpdate(ImageCreate):
 class ImageResponse(ImageBase):
     """Image response scheme"""
 
-    id: int
+    id: uuid.UUID
     title: str_type
     description: str_type
     filename: str

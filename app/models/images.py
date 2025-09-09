@@ -1,6 +1,7 @@
+import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, String, func
+from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -11,7 +12,7 @@ class Image(Base):
 
     __tablename__ = "images"
 
-    id: Mapped[int] = mapped_column(BigInteger(), primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     title: Mapped[str] = mapped_column(String(length=32), unique=True)
     description: Mapped[str] = mapped_column(String(length=32))
     filename: Mapped[str] = mapped_column(String(length=128))
