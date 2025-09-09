@@ -5,7 +5,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.depends import get_redis, get_session
-from app.schemes.images import ImageCreate, ImageResponse
+from app.schemes.images import ImageCreate, ImageResponse, ImageUpdate
 from app.use_cases.images import img_use_case
 
 router = APIRouter()
@@ -50,3 +50,35 @@ async def get_image(
     """
 
     return await img_use_case.get_image(id=id, redis=redis, session=session)
+
+
+@router.get(
+    path="/",
+    summary="Get all images",
+    response_model=list[ImageResponse],
+    status_code=status.HTTP_200_OK,
+)
+async def get_all_images(
+    session: Annotated[AsyncSession, Depends(get_session)],
+):
+    return await img_use_case.get_all_images(session=session)
+
+
+@router.put(
+    path="/{id}",
+    summary="Update image",
+    response_model=ImageResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def update_image(
+    id: str,
+    image: Annotated[ImageUpdate, Depends()],
+    session: Annotated[AsyncSession, Depends(get_session)],
+):
+    """
+    - **image_id**: str - image id
+    - **title**: str - min 1, max 32 characters
+    - **description**: str - min 1, max 32 characters
+    """
+
+    return await img_use_case.update_image(id=id, session=session, image=image)

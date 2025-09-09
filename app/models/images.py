@@ -23,7 +23,7 @@ class Image(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
-        server_onupdate=func.now(),
+        onupdate=func.now(),
     )
     file_url: Mapped[str] = mapped_column(String(length=128))
 

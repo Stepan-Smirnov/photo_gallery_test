@@ -1,3 +1,5 @@
+from re import A
+import uuid
 import json
 import logging
 from pathlib import Path
@@ -24,7 +26,7 @@ from app.exception import (
 )
 from app.models.images import Image
 from app.repositories.images import ImagesRepository
-from app.schemes.images import ImageCreate, ImageResponse, ImageWrite
+from app.schemes.images import ImageCreate, ImageResponse, ImageUpdate, ImageWrite
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +39,9 @@ class ImageUseCase:
         self.uploads_dir.mkdir(parents=True, exist_ok=True)
 
 
-    def _delete_file(self, file_url: Path):
+    def _delete_file(self, file_url: Path) -> None:
+        """Delete file in uploads directory"""
+
         if file_url.exists():
             file_url.unlink()
 
@@ -59,7 +63,7 @@ class ImageUseCase:
 
         try:
             filename = file.filename
-            file_url = self.uploads_dir / filename
+            file_url = self.uploads_dir / f"{uuid.uuid4()}.{filename.split('.')[-1]}"
 
             async with aiofiles.open(file_url, "wb") as f:
                 while chunk := await file.read(ONE_CHUNK):
@@ -101,20 +105,50 @@ class ImageUseCase:
         redis: Redis,
     ) -> Image:
         """Get image case"""
+        
+        redis_key = f"{REDIS_KEY_PREFIX}{id}"
+        try:
+            img = await redis.get(name=redis_key)
+            if img:
+                return ImageResponse.model_validate_json(img)
+        except Exception:
+            logger.exception("Error getting image from redis")
 
-        img = await redis.get(name=f"{REDIS_KEY_PREFIX}{id}")
-        if img:
-            return ImageResponse.model_validate_json(img)
-
-        img_repo = ImagesRepository(session=session)
-        img = await img_repo.get(id=id)
-
-        await redis.set(
-            name=f"{REDIS_KEY_PREFIX}{id}",
-            value=ImageResponse.model_validate(img).model_dump_json(),
-            ex=REDIS_KEY_EXPIRE,
-        )
+        img = await ImagesRepository(session=session).get(id=id)
+    
+        try:
+            await redis.set(
+                    name=redis_key,
+                    value=ImageResponse.model_validate(img).model_dump_json(),
+                    ex=REDIS_KEY_EXPIRE,
+                )
+        except Exception:
+            logger.exception("Error setting image to redis")
         return img
 
+
+    async def get_all_images(
+        self,
+        session: AsyncSession,
+    ) -> list[Image]:
+        """Get all images case"""
+
+        return await ImagesRepository(session=session).get_list()
+
+
+    async def update_image(
+        self,
+        session: AsyncSession,
+        id: str,
+        image: ImageUpdate,
+    ) -> Image:
+        """Update image case"""
+
+        
+        async with session.begin():
+            img_repo = ImagesRepository(session=session)
+            img = await img_repo.get(id=id)
+            img = await img_repo.update(obj=img, obj_data=image)
+        return img
 
 img_use_case = ImageUseCase()

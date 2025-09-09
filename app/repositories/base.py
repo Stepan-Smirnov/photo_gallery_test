@@ -40,12 +40,9 @@ class BaseRepository[T](AbstractRepository[T]):
         """Update item in database"""
 
         update_data = obj_data.model_dump(exclude_unset=True)
-        query = (
-            update(self.model)
-            .where(self.model.id == obj.id)
-            .values(**update_data)
-        )
+        query = update(self.model).filter_by(id=obj.id).values(**update_data)
         await self.session.execute(query)
+        await self.session.refresh(obj)
         return obj
 
     async def delete(self, obj: T) -> None:

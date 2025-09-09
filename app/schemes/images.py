@@ -33,7 +33,7 @@ class ImageCreate(ImageBase):
         return data
 
 
-class ImageUpdate(ImageCreate):
+class ImageUpdate(ImageBase):
     """Image update scheme"""
 
     title: str_type | None = None
