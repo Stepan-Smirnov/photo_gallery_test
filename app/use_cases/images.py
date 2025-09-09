@@ -81,7 +81,9 @@ class ImageUseCase:
             )
 
             async with session.begin():
-                img = await ImagesRepository(session=session).create(instance=dto)
+                img = await ImagesRepository(session=session).create(
+                    instance=dto
+                )
 
         except IntegrityError:
             self._delete_file(file_url=file_url)
