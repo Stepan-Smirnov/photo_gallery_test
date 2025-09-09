@@ -9,6 +9,11 @@ class CustomExceptions(HTTPException):
         super().__init__(status_code=self.status_code, detail=self.detail)
 
 
+
+class ServerError(CustomExceptions):
+    detail = "Internal server error"
+
+
 class ObjNotFound(CustomExceptions):
     status_code = status.HTTP_404_NOT_FOUND
     detail = "object not found"

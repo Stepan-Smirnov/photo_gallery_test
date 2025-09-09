@@ -5,7 +5,7 @@ from redis.asyncio import Redis
 
 from app.api.routers import main_router
 from app.core import settings
-
+from app.config_logs import config_logs
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -17,6 +17,7 @@ async def lifespan(app: FastAPI):
         encoding="utf-8",
     )
     await app.state.redis.ping()
+    config_logs()
     try:
         yield
     finally:

@@ -1,3 +1,5 @@
+import logging
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, UploadFile, status
@@ -7,6 +9,10 @@ from app.api.depends import get_uow, get_redis
 from app.core.unit_of_work import UnitOfWork
 from app.schemes.images import ImageCreate, ImageResponse
 from app.use_cases.images import img_use_case
+from app.exception import ServerError
+
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -28,6 +34,13 @@ async def create_image(
     - **description**: str - min 1, max 32 characters
     - **file**: UploadFile - max 10MB
     """
-    return await img_use_case.create_image(uow=uow, dto=image, file=file, redis=redis)
+    
+    try:
+        return await img_use_case.create_image(
+            uow=uow, dto=image, file=file, redis=redis
+        )
+    except Exception:
+        logger.exception(msg="Error creating image")
+        raise ServerError
 
 

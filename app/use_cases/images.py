@@ -1,10 +1,12 @@
+import json
+import logging
 from pathlib import Path
 
 import aiofiles
 from fastapi import UploadFile
 from redis.asyncio import Redis
 
-from app.constants import IMAGE_EXTENSIONS, MAX_IMAGE_SIZE, ONE_CHUNK
+from app.constants import IMAGE_EXTENSIONS, MAX_IMAGE_SIZE, ONE_CHUNK, REDIS_CHANNEL
 from app.core.unit_of_work import UnitOfWork
 from app.exception import (
     ImageAlreadyExists,
@@ -14,6 +16,9 @@ from app.exception import (
 from app.models.images import Image
 from app.repositories.images import ImagesRepository
 from app.schemes.images import ImageCreate, ImageWrite
+
+
+logger = logging.getLogger(__name__)
 
 
 class ImageUseCase:
@@ -60,10 +65,17 @@ class ImageUseCase:
             )
 
             img = await img_repo.create(item=dto)
+        
+        logger.info(msg=f"Image uploaded: {img.id} {img.title}")
         try:
-            await redis.publish("image_created", dto.model_dump_json())
+            payload = dict(
+                event=REDIS_CHANNEL,
+                id=str(img.id),
+                title=img.title,
+            )
+            await redis.publish(REDIS_CHANNEL, json.dumps(payload))
         except Exception:
-            print("Error publishing image created event")
+            logger.exception(msg="Error publishing image created event")
         return img
 
 
