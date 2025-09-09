@@ -33,7 +33,7 @@ class ImageUseCase:
 
         async with uow:
         
-            img_repo = uow.repo(ImagesRepository)
+            img_repo: ImagesRepository = uow.repo(ImagesRepository)
             img = await img_repo.check_image_exists(dto.title)
             if img:
                 raise ImageAlreadyExists
@@ -57,7 +57,7 @@ class ImageUseCase:
                 file_url=str(file_url),
             )
 
-            img = await img_repo.add(item=dto)
+            img = await img_repo.create(item=dto)
             return img
 
 

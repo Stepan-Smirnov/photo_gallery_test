@@ -6,7 +6,7 @@ from app.exception import ObjNotFound
 from app.repositories.abstract import AbstractRepository
 
 
-class BaseRepository[T](AbstractRepository):
+class BaseRepository[T](AbstractRepository[T]):
     """Base repository class"""
 
     def __init__(self, session: AsyncSession, model: T) -> None:
