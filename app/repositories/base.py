@@ -13,12 +13,13 @@ class BaseRepository[T](AbstractRepository[T]):
         self.session = session
         self.model = model
 
-    async def create(self, item: BaseModel) -> T:
+    async def create(self, instance: BaseModel) -> T:
         """Add item to database"""
 
-        obj = self.model(**item.model_dump())
-        self.session.add(obj)
-        return obj
+        instance = self.model(**instance.model_dump())
+        self.session.add(instance)
+        await self.session.flush()
+        return instance
 
     async def get(self, id: str | int) -> T | None:
         """Get item from database or none"""
@@ -36,16 +37,17 @@ class BaseRepository[T](AbstractRepository[T]):
         )
         return result.all()
 
-    async def update(self, obj: T, obj_data: BaseModel) -> T:
+    async def update(self, instance: T, data: BaseModel) -> T:
         """Update item in database"""
 
-        update_data = obj_data.model_dump(exclude_unset=True)
-        query = update(self.model).filter_by(id=obj.id).values(**update_data)
-        await self.session.execute(query)
-        await self.session.refresh(obj)
-        return obj
+        data = data.model_dump(exclude_unset=True)
+        for attr, value in data.items():
+            setattr(instance, attr, value)
+        await self.session.flush()
+        await self.session.refresh(instance)
+        return instance
 
-    async def delete(self, obj: T) -> None:
+    async def delete(self, instance: T) -> None:
         """Delete item from database"""
 
-        await self.session.delete(obj)
+        await self.session.delete(instance)
