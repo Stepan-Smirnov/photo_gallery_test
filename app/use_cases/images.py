@@ -143,11 +143,30 @@ class ImageUseCase:
     ) -> Image:
         """Update image case"""
 
-        
         async with session.begin():
             img_repo = ImagesRepository(session=session)
             img = await img_repo.get(id=id)
-            img = await img_repo.update(obj=img, obj_data=image)
-        return img
+            return await img_repo.update(obj=img, obj_data=image)
+
+    async def delete_image(
+        self,
+        session: AsyncSession,
+        id: str,
+    ) -> Image:
+        """Delete image case"""
+        return await ImagesRepository(session=session).delete(id=id)
+    
+    async def delete_image(
+        self,
+        session: AsyncSession,
+        id: str,
+    ) -> Image:
+        """Delete image case"""
+
+        async with session.begin():
+            img_repo = ImagesRepository(session=session)
+            img = await img_repo.get(id=id)
+            self._delete_file(file_url=Path(img.file_url))
+            return await img_repo.delete(obj=img)
 
 img_use_case = ImageUseCase()

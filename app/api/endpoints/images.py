@@ -72,7 +72,7 @@ async def get_all_images(
 )
 async def update_image(
     id: str,
-    image: Annotated[ImageUpdate, Depends()],
+    image: ImageUpdate,
     session: Annotated[AsyncSession, Depends(get_session)],
 ):
     """
@@ -82,3 +82,15 @@ async def update_image(
     """
 
     return await img_use_case.update_image(id=id, session=session, image=image)
+
+
+@router.delete(
+    path="/{id}",
+    summary="Delete image",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_image(
+    id: str,
+    session: Annotated[AsyncSession, Depends(get_session)],
+):
+    return await img_use_case.delete_image(id=id, session=session)
